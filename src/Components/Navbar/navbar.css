@@ -1,0 +1,17 @@
+.navbar {
+    /* border: 3px solid red; */
+    display: flex;
+    padding: 0 5rem;
+    align-items: center;
+    height: 5rem;
+
+}
+
+.navbar .nav-title {
+    margin: 0 2rem;
+}
+
+.navbar .nav-fav {
+    margin: 0 2rem;
+
+}
