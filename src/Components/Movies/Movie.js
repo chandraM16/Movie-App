@@ -1,28 +1,94 @@
 import React, { Component } from "react";
-import { movies } from "../moviesCont";
+// import { movies } from "../moviesCont";
 import "../Movies/movies.css";
+import axios from "axios";
 
 export default class Movie extends Component {
   constructor() {
     super();
     this.state = {
       isInCard: "",
-      page: [1],
+      pageNo: [1],
+      currPage: 1,
+      movies: [],
     };
+    console.log("constructor");
   }
+
+  async componentDidMount() {
+    // all side effect work will execute here
+    let urlResult = await axios(
+      `https://api.themoviedb.org/3/movie/popular?api_key=fbeee1a4bf1091796397b7e151f8e240&language=en-US&page=${this.state.currPage}`
+    );
+    const data = urlResult.data;
+    this.setState({
+      movies: [...data.results],
+    });
+    console.log(data);
+    console.log("mount");
+  }
+
+  changeMovies = async () => {
+    console.log(this.state.currPage);
+    let urlResult = await axios(
+      `https://api.themoviedb.org/3/movie/popular?api_key=fbeee1a4bf1091796397b7e151f8e240&language=en-US&page=${this.state.currPage}`
+    );
+    const data = urlResult.data;
+    this.setState({
+      movies: [...data.results],
+    });
+  };
+
+  handleNextMoviesClick = () => {
+    let tempAr = [];
+    for (let i = 0; i < this.state.pageNo.length + 1; i++) {
+      tempAr.push(i + 1);
+    }
+
+    this.setState(
+      {
+        pageNo: [...tempAr],
+        currPage: this.state.currPage + 1,
+      },
+      this.changeMovies
+    );
+  };
+
+  handlePrevMoviesClick = () => {
+    if (this.state.currPage !== -1) {
+      this.setState(
+        {
+          currPage: this.state.currPage - 1,
+        },
+        this.changeMovies
+      );
+    }
+  };
+
+  handlePageClick = (value) => {
+    if (this.state.currPage !== value) {
+      this.setState(
+        {
+          currPage: value,
+        },
+        this.changeMovies
+      );
+    }
+  };
+
   render() {
-    let moviesArr = movies.results;
-    console.log(moviesArr);
+    console.log("render");
+
     return (
       <div className="movies-card-cont">
         <div>Trading</div>
-        {!moviesArr ? (
+        {this.state.movies.length == 0 ? (
           <div className="spinner-border text-secondary" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         ) : (
           <div className="movie-card-box">
-            {moviesArr.map((movieObj, i) => {
+            {this.state.movies.map((movieObj, i) => {
               return (
                 <div
                   key={i}
@@ -64,14 +130,19 @@ export default class Movie extends Component {
           <nav aria-label="Page navigation example">
             <ul className="pagination">
               <li className="page-item">
-                <a className="page-link" href="#">
+                <a className="page-link" onClick={this.handlePrevMoviesClick}>
                   Previous
                 </a>
               </li>
-              {this.state.page.map((pageNo, i) => {
+              {this.state.pageNo.map((pageNo, i) => {
                 return (
                   <li key={i} className="page-item">
-                    <a className="page-link" href="#">
+                    <a
+                      className="page-link"
+                      onClick={() => {
+                        this.handlePageClick(pageNo);
+                      }}
+                    >
                       {pageNo}
                     </a>
                   </li>
@@ -79,7 +150,7 @@ export default class Movie extends Component {
               })}
 
               <li className="page-item">
-                <a className="page-link" href="#">
+                <a className="page-link" onClick={this.handleNextMoviesClick}>
                   Next
                 </a>
               </li>
